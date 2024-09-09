@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -33,6 +32,12 @@ export default function Game() {
     const winner = checkWinner(newBoard);
     if (winner) {
       Alert.alert(`Player ${winner} wins!`);
+      resetGame();
+      return;
+    }
+    if (newBoard.every(cell => cell !== null)) {
+      Alert.alert('Empate!');
+      resetGame();
       return;
     }
 
@@ -60,6 +65,11 @@ export default function Game() {
     return null;
   };
 
+  const resetGame = () => {
+    setBoard(initialBoard);
+    setCurrentPlayer(player);
+  };
+
   const handleGoBack = () => {
     navigation.goBack();
   };
@@ -67,7 +77,7 @@ export default function Game() {
   return (
     <Container>
       <HeaderContainer>
-        <Header showBackButton callbackHome={()=>handleGoBack()} />
+        <Header showBackButton callbackHome={() => handleGoBack()} />
         <Highlight title="Jogo da Velha" subtitle={`Jogador Atual: ${currentPlayer}`} />
       </HeaderContainer>
       <Content>
