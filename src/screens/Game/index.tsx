@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Table from '@components/Table';
@@ -7,7 +7,7 @@ import { Header } from '@components/Header/Index';
 import { Highlight } from '@components/Highlight';
 
 type RouteParams = {
-  player: 'X' | 'O';
+  player: 'X' | 'O'; 
 };
 
 type CellValue = 'X' | 'O' | null;
@@ -22,8 +22,14 @@ export default function Game() {
   const [board, setBoard] = useState<CellValue[]>(initialBoard);
   const [currentPlayer, setCurrentPlayer] = useState<'X' | 'O'>(player);
 
+  useEffect(() => {
+    if (currentPlayer !== player) {
+      handleBotMove();
+    }
+  }, [currentPlayer]);
+
   const handleCellPress = (index: number) => {
-    if (board[index] || checkWinner(board)) return;
+    if (board[index] || checkWinner(board) || currentPlayer !== player) return;
 
     const newBoard = [...board];
     newBoard[index] = currentPlayer;
@@ -35,13 +41,45 @@ export default function Game() {
       resetGame();
       return;
     }
+
     if (newBoard.every(cell => cell !== null)) {
       Alert.alert('Empate!');
       resetGame();
       return;
     }
 
+
     setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
+  };
+
+  const handleBotMove = () => {
+    if (checkWinner(board) || board.every(cell => cell !== null)) return;
+
+    const emptyIndices = board
+      .map((cell, index) => (cell === null ? index : null))
+      .filter(index => index !== null);
+
+    if (emptyIndices.length === 0) return;
+
+    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    const newBoard = [...board];
+    newBoard[randomIndex as number] = currentPlayer;
+    setBoard(newBoard);
+
+    const winner = checkWinner(newBoard);
+    if (winner) {
+      Alert.alert(`Player ${winner} wins!`);
+      resetGame();
+      return;
+    }
+
+    if (newBoard.every(cell => cell !== null)) {
+      Alert.alert('Empate!');
+      resetGame();
+      return;
+    }
+
+    setCurrentPlayer(player);
   };
 
   const checkWinner = (board: CellValue[]): CellValue => {

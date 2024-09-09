@@ -22,7 +22,9 @@ export default function Table({ board, onPress }: TableProps) {
     <Container>
       {board.map((cell, index) => (
         <Cell key={index} onPress={() => onPress(index)}>
-          <CellText>{cell}</CellText>
+          <CellText style={{ color: cell === 'O' ? 'blue' : cell === 'X' ? 'red' : 'black' }}>
+            {cell}
+            </CellText>
         </Cell>
       ))}
     </Container>
